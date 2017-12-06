@@ -324,7 +324,7 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 			if (!validateMemberInfo()) {
 				return;
 			}
-			//@@@ データベースに会員登録を依頼する部分は未実装。
+			//@@@ データベースに会員登録を依頼する部分は未実装。 完了
 			app.memberRegistrationRequested(member);
 		}
 	}

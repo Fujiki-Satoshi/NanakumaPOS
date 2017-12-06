@@ -24,7 +24,7 @@ import jp.ac.fukuoka_u.tl.NanakumaPOS.Member.Gender;
 
 public class DBServerIF {
 	private Connection conn;
-	private String url = "jdbc:mysql://hamburg.tl.fukuoka-u.ac.jp/nanakumapos";
+	private String url = "jdbc:mysql://hamburg.tl.fukuoka-u.ac.jp/nanakumapos6";
 	private String user = "b3pbl";
 	private String password = "nanakumapbl";
 
@@ -124,8 +124,7 @@ public class DBServerIF {
 	public void registerMember(Member member) throws DBServerIFException {
 		//@@@ 未実装
 		try {
-		int count;
-		
+			
 		char seibetu;
 		 Gender gender = member.getGender();
 			if(gender == gender.Male)
@@ -135,7 +134,8 @@ public class DBServerIF {
 			
 		Statement stmt = conn.createStatement();
 		String sql = "INSERT INTO membertbl VALUES('"+member.getID()+"','"+member.getName()+"' ,'"+member.getFurigana()+"' ,'"+seibetu+"');";
-		ResultSet rs = stmt.executeQuery(sql);
+		stmt.execute(sql);
+		
 		}
 		catch(SQLException ex){
 			throw new DBServerIFException("SQLException: " + ex.getMessage());
@@ -149,7 +149,6 @@ public class DBServerIF {
 	public void updateMember(Member member) throws DBServerIFException {
 		//@@@ 未実装 完了
 		try {
-			int count;
 		 char seibetu;
 		 Gender gender = member.getGender();
 			if(gender == gender.Male)
