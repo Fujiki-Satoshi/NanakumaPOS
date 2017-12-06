@@ -401,8 +401,18 @@ public class POSTerminalApp {
 	/*
 	 * 会員削除が要求されたときに呼び出される。
 	 */
-	public Boolean memberDeletionRequested() {
+	public Boolean memberDeletionRequested(Member member) {
 		//@@@ データベースに会員削除を依頼する部分は未実装。
+		try {
+			memberUnderManagement = dbServerIF.deleteMember(member);
+			memberManagementScreenPanel.memberUnderManagementChanged();
+		}
+		catch (DBServerIFException ex) {
+			// データベースのアクセスに問題がある場合，問題の発生を店員に知らせ
+			// る。
+			JOptionPane.showMessageDialog(frame, ex.getMessage(), "エラー", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
 		return true;
 	}
 

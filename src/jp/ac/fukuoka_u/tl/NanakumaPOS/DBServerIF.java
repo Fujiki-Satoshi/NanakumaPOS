@@ -136,17 +136,20 @@ public class DBServerIF {
 	 * 会員番号 memberID の会員を削除する。
 	 */
 	public void deleteMember(String memberID) throws DBServerIFException {
+	public Member deleteMember(Member member) throws DBServerIFException {
 		//@@@ 未実装
 		//@@@ 削除する会員の購入履歴も削除しなければならないことに注意。
 
+		String memberID = member.getID();
+		
 		try {
 			Statement stmt = conn.createStatement();
 			String sql = "delete from membertbl where id='" + memberID + "';";
-			ResultSet rs = stmt.executeQuery(sql);
+			int m = stmt.executeUpdate(sql);
 		}
 		catch (SQLException ex) {
 			throw new DBServerIFException("SQLException: " + ex.getMessage());
 		}
-		return;
+		return member;
 	}
 }

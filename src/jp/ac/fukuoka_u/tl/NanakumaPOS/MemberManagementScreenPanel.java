@@ -351,11 +351,19 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 	 * 会員削除が要求されたときに呼び出される。
 	 */
 	private void memberDeletionRequested() {
+		String memberID = memberIDField.getText();
 		String memberName = app.getMemberUnderManagement().getName();
+		String memberFurigana = memberFuriganaField.getText();
+		Gender gender = Gender.Male;
+		if(memberGenderMaleRadioButton.isSelected());
+		gender = Gender.Female;
+		
+		Member member = new Member(memberID,memberName,memberFurigana,gender);
+		
 		if (JOptionPane.showConfirmDialog(frame, "会員「" + memberName + "」を削除しますか？", "確認", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 			//@@@ データベースに会員の削除を依頼する部分は未実装。
-			
-			
+
+			app.memberDeletionRequested(member);
 		}
 	}
 
