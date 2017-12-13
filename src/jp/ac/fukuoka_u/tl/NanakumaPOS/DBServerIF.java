@@ -135,7 +135,6 @@ public class DBServerIF {
 	/*
 	 * 会員番号 memberID の会員を削除する。
 	 */
-	public void deleteMember(String memberID) throws DBServerIFException {
 	public Member deleteMember(Member member) throws DBServerIFException {
 		//@@@ 未実装
 		//@@@ 削除する会員の購入履歴も削除しなければならないことに注意。

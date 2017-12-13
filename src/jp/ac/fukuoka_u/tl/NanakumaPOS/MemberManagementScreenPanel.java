@@ -82,6 +82,7 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 	private JButton deleteMemberButton;
 	// ホーム画面ボタン
 	private JButton homeButton;
+	
 
 	/*
 	 * コンストラクタ。商品チェック画面が保有するオブジェクトを生成する。
@@ -355,8 +356,10 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 		String memberName = app.getMemberUnderManagement().getName();
 		String memberFurigana = memberFuriganaField.getText();
 		Gender gender = Gender.Male;
-		if(memberGenderMaleRadioButton.isSelected());
-		gender = Gender.Female;
+		if(memberGenderMaleRadioButton.isSelected())
+			gender = Gender.Male;
+		else
+			gender = Gender.Female;
 		
 		Member member = new Member(memberID,memberName,memberFurigana,gender);
 		

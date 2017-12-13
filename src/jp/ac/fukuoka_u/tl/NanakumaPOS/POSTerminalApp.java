@@ -405,7 +405,9 @@ public class POSTerminalApp {
 		//@@@ データベースに会員削除を依頼する部分は未実装。
 		try {
 			memberUnderManagement = dbServerIF.deleteMember(member);
+			memberUnderManagement = null;
 			memberManagementScreenPanel.memberUnderManagementChanged();
+			
 		}
 		catch (DBServerIFException ex) {
 			// データベースのアクセスに問題がある場合，問題の発生を店員に知らせ
