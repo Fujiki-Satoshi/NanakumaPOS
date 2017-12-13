@@ -173,6 +173,24 @@ public class DBServerIF {
 			throw new DBServerIFException("SQLException: " + ex.getMessage());
 		}
 	}
+	
+	/*
+	 * 会員情報の登録を受け付ける。
+	 * 会員情報 pointのとおりにデータベースに登録する。
+	 */
+	public void registerMemberpoint(String memberID, String point) throws DBServerIFException {
+		//@@@ 未実装
+		try {
+		
+		Statement stmt = conn.createStatement();
+		String sql = "INSERT INTO pointtbl VALUES('"+memberID+"','"+point+"');";
+		stmt.execute(sql);
+		
+		}
+		catch(SQLException ex){
+			throw new DBServerIFException("SQLException: " + ex.getMessage());
+		}
+	}
 
 	/*
 	 * 会員情報の変更要求を受け付ける。
@@ -208,6 +226,10 @@ try {
 			Statement stmt = conn.createStatement();
 			String sql = "DELETE from membertbl WHERE id = '"+memberID+"';";
 			int  i = stmt.executeUpdate(sql);
+			
+		    stmt= conn.createStatement();
+			sql= "DELETE from pointtbl WHERE id = '"+memberID+"';";
+		    i = stmt.executeUpdate(sql);
 			}
 			catch(SQLException ex){
 				throw new DBServerIFException("SQLException: " + ex.getMessage());

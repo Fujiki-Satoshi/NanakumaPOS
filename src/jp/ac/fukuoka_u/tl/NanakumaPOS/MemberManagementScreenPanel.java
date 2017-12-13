@@ -91,6 +91,11 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 	private JButton deleteMemberButton;
 	// ホーム画面ボタン
 	private JButton homeButton;
+	
+	// ポイントラベル
+	private JLabel pointLabel;
+	// ポイント欄
+	private JTextField pointField;
 
 	/*
 	 * コンストラクタ。商品チェック画面が保有するオブジェクトを生成する。
@@ -130,32 +135,40 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 		memberFuriganaField = new JTextField(8);
 		memberFuriganaField.setBounds(116, 80, 200, 24);
 		add(memberFuriganaField);
+		
+		// ポイント入力欄を生成する。
+		pointLabel = new JLabel("ポイント");
+		pointLabel.setBounds(16, 112, 100, 24);
+		add(pointLabel);
+		pointField = new JTextField(8);
+		pointField.setBounds(116, 112, 200, 24);
+		add(pointField);
 
 		// 性別入力欄を生成する。
 		memberGenderLabel = new JLabel("性別");
-		memberGenderLabel.setBounds(16, 112, 100, 24);
+		memberGenderLabel.setBounds(16, 144, 100, 24);
 		add(memberGenderLabel);
 		memberGenderGroup = new ButtonGroup();
 		memberGenderMaleRadioButton = new JRadioButton("男性");
-		memberGenderMaleRadioButton.setBounds(116, 112, 100, 24);
+		memberGenderMaleRadioButton.setBounds(116, 144, 100, 24);
 		memberGenderMaleRadioButton.setSelected(true);
 		add(memberGenderMaleRadioButton);
 		memberGenderFemaleRadioButton = new JRadioButton("女性");
-		memberGenderFemaleRadioButton.setBounds(216, 112, 100, 24);
+		memberGenderFemaleRadioButton.setBounds(216, 144, 100, 24);
 		add(memberGenderFemaleRadioButton);
 		memberGenderGroup.add(memberGenderMaleRadioButton);
 		memberGenderGroup.add(memberGenderFemaleRadioButton);
 
 		// 実行ボタンを生成する。
 		okButton = new JButton("実行");
-		okButton.setBounds(116, 144, 80, 24);
+		okButton.setBounds(116, 176, 80, 24);
 		okButton.addActionListener(this);
 		okButton.setActionCommand("ok");
 		add(okButton);
 
 		// 中止ボタンを生成する。
 		cancelButton = new JButton("中止");
-		cancelButton.setBounds(216, 144, 80, 24);
+		cancelButton.setBounds(216, 176, 80, 24);
 		cancelButton.addActionListener(this);
 		cancelButton.setActionCommand("cancel");
 		add(cancelButton);
@@ -208,6 +221,7 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 			memberIDField.setEditable(false);
 			memberNameField.setEditable(false);
 			memberFuriganaField.setEditable(false);
+			pointField.setEditable(false);
 			memberGenderMaleRadioButton.setEnabled(false);
 			memberGenderFemaleRadioButton.setEnabled(false);
 			okButton.setEnabled(false);
@@ -221,6 +235,7 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 			memberIDField.setEditable(true);
 			memberNameField.setEditable(true);
 			memberFuriganaField.setEditable(true);
+			pointField.setEditable(true);
 			memberGenderMaleRadioButton.setEnabled(true);
 			memberGenderFemaleRadioButton.setEnabled(true);
 			okButton.setEnabled(true);
@@ -234,6 +249,7 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 			memberIDField.setEditable(false);
 			memberNameField.setEditable(false);
 			memberFuriganaField.setEditable(false);
+			pointField.setEditable(false);
 			memberGenderMaleRadioButton.setEnabled(false);
 			memberGenderFemaleRadioButton.setEnabled(false);
 			okButton.setEnabled(false);
@@ -247,6 +263,7 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 			memberIDField.setEditable(false);
 			memberNameField.setEditable(true);
 			memberFuriganaField.setEditable(true);
+			pointField.setEditable(true);
 			memberGenderMaleRadioButton.setEnabled(true);
 			memberGenderFemaleRadioButton.setEnabled(true);
 			okButton.setEnabled(true);
@@ -321,8 +338,10 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 			else
 				gender = Gender.Female;
 			
+			String point = pointField.getText();
+			
 			Member member = new Member(memberIDField.getText(),memberNameField.getText(),memberFuriganaField.getText(),gender);
-			app.memberRegistrationRequested(member);
+			app.memberRegistrationRequested(member, point);
 		}
 	}
 
@@ -466,16 +485,19 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 	 */
 	public void memberUnderManagementChanged() {
 		Member member = app.getMemberUnderManagement();
+		int point = app.getMemberpoint();
 		if (member != null) {
 			memberIDField.setText(member.getID());
 			memberNameField.setText(member.getName());
 			memberFuriganaField.setText(member.getFurigana());
+			pointField.setText(""+point+"");
 			memberGenderMaleRadioButton.setSelected(member.getGender() == Gender.Male);
 			memberGenderFemaleRadioButton.setSelected(member.getGender() == Gender.Female);
 		} else {
 			memberIDField.setText("");
 			memberNameField.setText("");
 			memberFuriganaField.setText("");
+			pointField.setText("");
 			memberGenderMaleRadioButton.setSelected(false);
 			memberGenderFemaleRadioButton.setSelected(false);
 		}

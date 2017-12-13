@@ -386,7 +386,9 @@ public class POSTerminalApp {
 	public Boolean memberFindingRequested(String memberID) {
 		try {
 			memberUnderManagement = dbServerIF.findMember(memberID);
+			memberpoint = dbServerIF. findMemberpoint(memberID);
 			memberManagementScreenPanel.memberUnderManagementChanged();
+			
 		}
 		catch (DBServerIFException ex) {
 			// データベースのアクセスに問題がある場合，問題の発生を店員に知らせ
@@ -400,12 +402,15 @@ public class POSTerminalApp {
 	/*
 	 * 会員登録が要求されたときに呼び出される。
 	 */
-	public  Boolean memberRegistrationRequested(Member member) {
+	public  Boolean memberRegistrationRequested(Member member,String point) {
 		//@@@ データベースに会員登録を依頼する部分は未実装。
 		try {
 			memberUnderManagement = member;
+			memberpoint = Integer.parseInt(point);
 			dbServerIF.registerMember(member);
+			dbServerIF.registerMemberpoint(member.getID(), point);
 			memberManagementScreenPanel.memberUnderManagementChanged();
+		
 		}
 		catch(DBServerIFException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "エラー", JOptionPane.ERROR_MESSAGE);
