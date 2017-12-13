@@ -145,6 +145,10 @@ public class DBServerIF {
 			Statement stmt = conn.createStatement();
 			String sql = "delete from membertbl where id='" + memberID + "';";
 			int m = stmt.executeUpdate(sql);
+			
+			stmt = conn.createStatement();
+			sql = "delete from pointtbl where id='" + memberID + "';";
+			m = stmt.executeUpdate(sql);
 		}
 		catch (SQLException ex) {
 			throw new DBServerIFException("SQLException: " + ex.getMessage());
