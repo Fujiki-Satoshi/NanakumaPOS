@@ -91,6 +91,11 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 	private JLabel changePriceLabel;
 	// おつり金額欄
 	private JTextField changePriceField;
+	
+	// pointラベル
+	private JLabel pointLabel;
+	// point欄
+	private JTextField pointField;
 
 	/*
 	 * コンストラクタ。商品チェック画面が保有するオブジェクトを生成する。
@@ -199,6 +204,16 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 		memberNameField.setBackground(Color.CYAN);
 		memberNameField.setEditable(false);
 		add(memberNameField);
+		
+		// point欄を生成する。
+		pointLabel = new JLabel("ポイント");
+		pointLabel.setBounds(396, 632, 100, 24);
+		add(pointLabel);
+		pointField = new JTextField(32);
+		pointField.setBounds(496, 632, 100, 24);
+		pointField.setBackground(Color.CYAN);
+		pointField.setEditable(false);
+		add(pointField);
 
 		// お預かり欄を生成する。
 		paidPriceLabel = new JLabel("お預かり");
@@ -249,6 +264,7 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 			articleCodeButton.setEnabled(true);
 			memberIDField.setText("");
 			memberNameField.setText("");
+			pointField.setText("");
 			paidPriceField.setText("");
 			totalPriceField.setText("0");
 			changePriceField.setText("");
@@ -491,9 +507,11 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 	public void memberUnderCheckingChanged() {
 		// 会員表示欄の表示を更新する。
 		Member member = app.getMemberUnderChecking();
+		int point = app.getMemberpoint();
 		if (member != null) {
 			memberIDField.setText(member.getID());
 			memberNameField.setText(member.getName());
+			pointField.setText(""+point+"");
 		}
 	}
 }

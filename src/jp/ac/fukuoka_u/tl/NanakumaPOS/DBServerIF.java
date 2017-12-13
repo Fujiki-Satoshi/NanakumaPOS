@@ -116,6 +116,38 @@ public class DBServerIF {
 		}
 		return member;
 	}
+	
+	
+	/*
+	 * 会員の保有ポイントの検索を行う
+	 */
+	public int findMemberpoint(String membershipID) throws DBServerIFException {
+		int point = 0;
+		
+		try {
+			int count;
+			Statement stmt = conn.createStatement();
+			String sql = "select * from pointtbl where id='" + membershipID + "';";
+			ResultSet rs = stmt.executeQuery(sql);
+			count = 0;
+			while (rs.next()) {
+				point = rs.getInt("point");
+				count++;
+			}
+			if (count < 1) {
+				throw new DBServerIFException("この会員はデータベースに登録されていません。");
+			}
+			if (count > 1) {
+				throw new DBServerIFException("この会員はデータベースに重複登録されています。");
+			}
+			rs.close();
+		}
+		catch (SQLException ex) {
+			throw new DBServerIFException("SQLException: " + ex.getMessage());
+		}
+		return point;
+	}
+	
 
 	/*
 	 * 会員情報の登録を受け付ける。
@@ -171,5 +203,14 @@ public class DBServerIF {
 	public void deleteMember(String memberID) throws DBServerIFException {
 		//@@@ 未実装
 		//@@@ 削除する会員の購入履歴も削除しなければならないことに注意。
+try {
+			
+			Statement stmt = conn.createStatement();
+			String sql = "DELETE from membertbl WHERE id = '"+memberID+"';";
+			int  i = stmt.executeUpdate(sql);
+			}
+			catch(SQLException ex){
+				throw new DBServerIFException("SQLException: " + ex.getMessage());
+			}
 	}
 }

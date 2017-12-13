@@ -45,6 +45,9 @@ public class POSTerminalApp {
 	private SalesList salesUnderChecking;
 	// 会員管理業務対象の登録会員。会員が確定していない間は null とする。
 	private Member memberUnderManagement;
+	
+	// 会員の保有ポイントを表す。
+	private int memberpoint;
 
 	/* ビュー関係 */
 	// ウィンドウフレーム
@@ -149,6 +152,13 @@ public class POSTerminalApp {
 	 */
 	public Member getMemberUnderChecking() {
 		return memberUnderChecking;
+	}
+	
+	/*
+	 * 現在チェックを行っている登録会員のポイントを返す。
+	 */
+	public int getMemberpoint() {
+		return memberpoint;
 	}
 
 	/*
@@ -273,6 +283,7 @@ public class POSTerminalApp {
 	public Boolean memberIDEntered(String memberID) {
 		try {
 			memberUnderChecking = dbServerIF.findMember(memberID);
+			memberpoint = dbServerIF.findMemberpoint(memberID);
 			checkArticlesScreenPanel.memberUnderCheckingChanged();
 		}
 		catch (DBServerIFException ex) {
@@ -392,6 +403,7 @@ public class POSTerminalApp {
 	public  Boolean memberRegistrationRequested(Member member) {
 		//@@@ データベースに会員登録を依頼する部分は未実装。
 		try {
+			memberUnderManagement = member;
 			dbServerIF.registerMember(member);
 			memberManagementScreenPanel.memberUnderManagementChanged();
 		}
@@ -422,8 +434,17 @@ public class POSTerminalApp {
 	/*
 	 * 会員削除が要求されたときに呼び出される。
 	 */
-	public Boolean memberDeletionRequested() {
+	public Boolean memberDeletionRequested(String memberID) {
 		//@@@ データベースに会員削除を依頼する部分は未実装。
+		try{
+			dbServerIF.deleteMember(memberID);
+			memberUnderManagement = null;
+			memberManagementScreenPanel.memberUnderManagementChanged();
+		}
+		catch(DBServerIFException ex) {
+			JOptionPane.showMessageDialog(frame, ex.getMessage(), "エラー", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
 		return true;
 	}
 

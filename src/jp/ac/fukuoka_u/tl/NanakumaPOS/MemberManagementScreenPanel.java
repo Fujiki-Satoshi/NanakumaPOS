@@ -309,22 +309,19 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 	private void memberRegistrationConfirmed() {
 	
 		
-		String id = memberIDField.getText();
-		String name = memberNameField.getText();
-		String furigana = memberFuriganaField.getText();
-		Gender gender = Gender.Male;
-		if(memberGenderMaleRadioButton.isSelected())
-			gender = Gender.Male;
-		else
-			gender = Gender.Female;
 		
-		Member member = new Member(id, name, furigana, gender);
-
 		if (JOptionPane.showConfirmDialog(frame,  "会員登録しますか？", "確認", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 			if (!validateMemberInfo()) {
 				return;
 			}
 			//@@@ データベースに会員登録を依頼する部分は未実装。 完了
+			Gender gender = Gender.Male;
+			if(memberGenderMaleRadioButton.isSelected())
+				gender = Gender.Male;
+			else
+				gender = Gender.Female;
+			
+			Member member = new Member(memberIDField.getText(),memberNameField.getText(),memberFuriganaField.getText(),gender);
 			app.memberRegistrationRequested(member);
 		}
 	}
@@ -355,20 +352,14 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 				return;
 			}
 			//@@@ データベースに会員の更新を依頼する部分は未実装。 完了
-			String id = memberIDField.getText();
-			String name = memberNameField.getText();
-			String furigana = memberFuriganaField.getText();
 			Gender gender = Gender.Male;
 			if(memberGenderMaleRadioButton.isSelected())
 				gender = Gender.Male;
 			else
 				gender = Gender.Female;
 			
-			Member member = new Member(id,name,furigana,gender);
+			Member member = new Member(memberIDField.getText(),memberNameField.getText(),memberFuriganaField.getText(),gender);
 			
-			/*member.setName(name);
-			member.setFurigana(furigana);
-			member.setGender(gender);*/
 			
 			app.memberUpdatingRequested(member);
 		}
@@ -392,6 +383,8 @@ public class MemberManagementScreenPanel extends JPanel implements ActionListene
 		String memberName = app.getMemberUnderManagement().getName();
 		if (JOptionPane.showConfirmDialog(frame, "会員「" + memberName + "」を削除しますか？", "確認", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 			//@@@ データベースに会員の削除を依頼する部分は未実装。
+			
+			app.memberDeletionRequested(memberIDField.getText());
 		}
 	}
 
