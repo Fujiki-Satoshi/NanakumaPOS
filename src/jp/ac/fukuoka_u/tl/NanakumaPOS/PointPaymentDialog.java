@@ -1,16 +1,15 @@
+package jp.ac.fukuoka_u.tl.NanakumaPOS;
+
 //-*- java -*-
 /******************************************************************************
- *
- *  福岡大学工学部電子情報工学科プロジェクト型ソフトウェア開発演習教材
- *
- *  Copyright (C) 2015 プロジェクト型ソフトウェア開発演習実施チーム
- *
- *  「決済」ダイアログ。
- *
- *	決済時の各ボタンの生成、表示及び簡単なエラー処理
- *****************************************************************************/
-
-package jp.ac.fukuoka_u.tl.NanakumaPOS;
+*
+*  福岡大学工学部電子情報工学科プロジェクト型ソフトウェア開発演習教材
+*
+*  Copyright (C) 2015 プロジェクト型ソフトウェア開発演習実施チーム
+*
+*  「ポイント決済」ダイアログ。
+*
+*****************************************************************************/
 
 import java.awt.Color;
 import java.awt.Container;
@@ -24,15 +23,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-public class PaymentDialog extends JDialog implements ActionListener{
-	
-
+public class PointPaymentDialog extends JDialog implements ActionListener{
 	/* データ */
 	// 合計金額
 	private int totalPrice;
 	// お預かり
-	private int paidPrice;
-	//ポイント
 	private int paidPoint;
 	// OKボタンが押されたか
 	private Boolean confirmed;
@@ -43,28 +38,26 @@ public class PaymentDialog extends JDialog implements ActionListener{
 	private JLabel totalPriceLabel;
 	// 合計金額欄
 	private JTextField totalPriceField;
-	// お預かり欄ラベル
-	private JLabel paidPriceLabel;
-	// お預かり欄
-	private JTextField paidPriceField;
+	// ポイント欄ラベル
+	private JLabel paidPointLabel;
+	// ポイント欄
+	private JTextField paidPointField;
 	// 決済ボタン
 	private JButton okButton;
 	// 中止ボタン
 	private JButton cancelButton;
 
-
 	/*
 	 * コンストラクタ
 	 */
-	public PaymentDialog(JFrame _owner, int _totalPrice) {
+	public PointPaymentDialog(JFrame _owner, int _totalPrice) {
 		super(_owner, true);
 		owner = _owner;
 		totalPrice = _totalPrice;
 		confirmed = false;
-	
 
 		setLayout(null);
-		setTitle("決済");
+		setTitle("ポイント決済");
 		setSize(248, 175);
 		setLocationRelativeTo(owner);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -83,22 +76,19 @@ public class PaymentDialog extends JDialog implements ActionListener{
 		totalPriceField.setText(Integer.toString(totalPrice));
 		contentPane.add(totalPriceField);
 
-		// お預かり欄を生成する。
-		paidPriceLabel = new JLabel("お預かり");
-		paidPriceLabel.setBounds(16, 48, 100, 24);
-		contentPane.add(paidPriceLabel);
-		paidPriceField = new JTextField (8);
-		paidPriceField.setBounds(116, 48, 100, 24);
-		paidPriceField.setBackground(Color.YELLOW);
-		paidPriceField.setHorizontalAlignment(JTextField.RIGHT);
-		paidPriceField.setEditable(true);
-		contentPane.add(paidPriceField);
-		
-
-		
+		// ポイント欄を生成する。
+		paidPointLabel = new JLabel("使用ポイント");
+		paidPointLabel.setBounds(16, 48, 100, 24);
+		contentPane.add(paidPointLabel);
+		paidPointField = new JTextField (8);
+		paidPointField.setBounds(116, 48, 100, 24);
+		paidPointField.setBackground(Color.YELLOW);
+		paidPointField.setHorizontalAlignment(JTextField.RIGHT);
+		paidPointField.setEditable(true);
+		contentPane.add(paidPointField);
 
 		// OKボタンを生成する。
-		okButton = new JButton("決済");
+		okButton = new JButton("ポイント決済");
 		okButton.setBounds(26, 96, 80, 24);
 		okButton.addActionListener(this);
 		okButton.setActionCommand("ok");
@@ -110,9 +100,7 @@ public class PaymentDialog extends JDialog implements ActionListener{
 		cancelButton.addActionListener(this);
 		cancelButton.setActionCommand("cancel");
 		contentPane.add(cancelButton);
-	
 	}
-	
 
 	/*
 	 * 決済ダイアログを閉じるときにOKボタンが押されたかを返す。
@@ -122,41 +110,43 @@ public class PaymentDialog extends JDialog implements ActionListener{
 	}
 
 	/*
-	 * お預かり額を返す。
+	 * ポイントを返す。
 	 */
-	public int getPaidPrice() {
-		return paidPrice;
+	public int getPaidPoint() {
+		return paidPoint;
 	}
-	
-	
+
 	/*
 	 * 決済の意思が確認されたときに呼び出される。
 	 */
 	private void paymentConfirmed() {
 		try {
-			paidPrice = Integer.parseInt(paidPriceField.getText());
+			paidPoint = Integer.parseInt(paidPointField.getText());
+			int Point = Integer.parseInt(CheckArticlesScreenPanel.pointField.getText());
+			
+			if	(paidPoint > Point) {
+			JOptionPane.showMessageDialog(owner, "ポイントの入力が不正です。", "エラー", JOptionPane.ERROR_MESSAGE);
+			paidPointField.requestFocusInWindow();
+			return;
+			}
+			if (paidPoint > totalPrice) {
+				JOptionPane.showMessageDialog(owner, "合計金額を超えています。", "エラー", JOptionPane.ERROR_MESSAGE);
+				paidPointField.requestFocusInWindow();
+				return;
+			}
 		}
 		catch (NumberFormatException ex) {
-			paidPrice = 0;
-			JOptionPane.showMessageDialog(owner, "お預かりの入力が不正です。", "エラー", JOptionPane.ERROR_MESSAGE);
-			paidPriceField.requestFocusInWindow();
-			return;
-		}
-		if (paidPrice < totalPrice) {
-			JOptionPane.showMessageDialog(owner, "お預かりが不足しています。", "エラー", JOptionPane.ERROR_MESSAGE);
-			paidPriceField.requestFocusInWindow();
-			return;
+		
 		}
 		confirmed = true;
 		dispose();
 	}
-	
 
 	/*
 	 * 決済の意思が中止されたときに呼び出される。
 	 */
 	private void paymentCancelled() {
-		paidPrice = 0;
+		paidPoint = 0;
 		confirmed = false;
 		dispose();
 	}

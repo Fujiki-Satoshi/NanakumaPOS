@@ -17,6 +17,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.format.DateTimeFormatter;
 
 import jp.ac.fukuoka_u.tl.NanakumaPOS.Member.Gender;
 
@@ -109,6 +110,7 @@ public class DBServerIF {
 			if (count > 1) {
 				throw new DBServerIFException("この会員はデータベースに重複登録されています。");
 			}
+			
 			rs.close();
 		}
 		catch (SQLException ex) {
@@ -148,12 +150,16 @@ public class DBServerIF {
 		return point;
 	}
 	
+	
+	
+
+	
 
 	/*
 	 * 会員情報の登録を受け付ける。
-	 * 会員情報 member のとおりにデータベースに登録する。
+	 * 会員情報 member , ポイントのとおりにデータベースに登録する。
 	 */
-	public void registerMember(Member member) throws DBServerIFException {
+	public void registerMember(Member member, String point) throws DBServerIFException {
 		//@@@ 未実装
 		try {
 			
@@ -168,29 +174,18 @@ public class DBServerIF {
 		String sql = "INSERT INTO membertbl VALUES('"+member.getID()+"','"+member.getName()+"' ,'"+member.getFurigana()+"' ,'"+seibetu+"');";
 		stmt.execute(sql);
 		
+		stmt = conn.createStatement();
+		sql = "INSERT INTO pointtbl VALUES('"+member.getID()+"','"+point+"');";
+		stmt.execute(sql);
+		
+		
+		
 		}
 		catch(SQLException ex){
 			throw new DBServerIFException("SQLException: " + ex.getMessage());
 		}
 	}
 	
-	/*
-	 * 会員情報の登録を受け付ける。
-	 * 会員情報 pointのとおりにデータベースに登録する。
-	 */
-	public void registerMemberpoint(String memberID, String point) throws DBServerIFException {
-		//@@@ 未実装
-		try {
-		
-		Statement stmt = conn.createStatement();
-		String sql = "INSERT INTO pointtbl VALUES('"+memberID+"','"+point+"');";
-		stmt.execute(sql);
-		
-		}
-		catch(SQLException ex){
-			throw new DBServerIFException("SQLException: " + ex.getMessage());
-		}
-	}
 
 	/*
 	 * 会員情報の変更要求を受け付ける。
@@ -214,6 +209,40 @@ public class DBServerIF {
 				throw new DBServerIFException("SQLException: " + ex.getMessage());
 			}
 	}
+	
+	/*
+	 * ポイントの更新
+	 */
+	public void updateMemberPoint(String memberID, int point) throws DBServerIFException {
+		//@@@ 未実装 完了
+		try {
+			
+			Statement stmt = conn.createStatement();
+			String sql = "UPDATE pointtbl SET  point='"+point+"' WHERE id = '"+memberID+"';";
+			int  i = stmt.executeUpdate(sql);
+			}
+			catch(SQLException ex){
+				throw new DBServerIFException("SQLException: " + ex.getMessage());
+			}
+	}
+	
+	/*
+	 * 販売履歴の追加を行う
+	 */
+	public void updateHistory(String memberID, Sale Sale) throws DBServerIFException {
+		//@@@ 未実装 完了
+				try {
+					
+					Statement stmt = conn.createStatement();
+					String sql = "INSERT into history VALUES('"+memberID+"', '"+Sale.getArticleCode()+"', '"+Sale.getSalesPrice()+"', '"+Sale.getSalesQuantity()+"', '"+Sale.getSalesDate().format(DateTimeFormatter.ISO_LOCAL_DATE)+"');";
+					int  i = stmt.executeUpdate(sql);
+					}
+					catch(SQLException ex){
+						throw new DBServerIFException("SQLException: " + ex.getMessage());
+					}
+		
+	}
+
 
 	/*
 	 * 会員番号 memberID の会員を削除する。
@@ -221,15 +250,22 @@ public class DBServerIF {
 	public void deleteMember(String memberID) throws DBServerIFException {
 		//@@@ 未実装
 		//@@@ 削除する会員の購入履歴も削除しなければならないことに注意。
-try {
-			
+		try {
+			//会員情報の消去
 			Statement stmt = conn.createStatement();
 			String sql = "DELETE from membertbl WHERE id = '"+memberID+"';";
 			int  i = stmt.executeUpdate(sql);
 			
-		    stmt= conn.createStatement();
-			sql= "DELETE from pointtbl WHERE id = '"+memberID+"';";
-		    i = stmt.executeUpdate(sql);
+			//当該会員の保有ポイントの消去
+			Statement stmt_point = conn.createStatement();
+			String sql_point = "DELETE from pointtbl WHERE id = '"+memberID+"';";
+			i = stmt_point.executeUpdate(sql_point);
+			
+			//購入履歴の消去
+			Statement stmt_history = conn.createStatement();
+			String sql_history = "DELETE from history WHERE id = '"+memberID+"';";
+			i = stmt_history.executeUpdate(sql_history);
+			
 			}
 			catch(SQLException ex){
 				throw new DBServerIFException("SQLException: " + ex.getMessage());

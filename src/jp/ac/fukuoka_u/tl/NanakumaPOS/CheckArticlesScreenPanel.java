@@ -30,10 +30,13 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import jp.ac.fukuoka_u.tl.NanakumaPOS.DBServerIF.DBServerIFException;
+
 public class CheckArticlesScreenPanel extends JPanel implements ActionListener, TableModelListener {
 	/* 商品チェック画面の状態 */
 	enum CheckArticlesScreenPanelState {
 		Initialized,		// 初期化済み
+		CheckMember,		// 会員選択状態
 		CheckingArticles,	// 商品チェック中
 		PaymentFinished,	// 決済済み
 	};
@@ -63,6 +66,11 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 	private JButton changeQuantityButton;
 	// 決済ボタン
 	private JButton paymentButton;
+	
+	// 決済ボタン
+	private JButton PointpaymentButton;
+		
+		
 	// ホームボタン
 	private JButton homeButton;
 	// 商品コードラベル
@@ -82,7 +90,11 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 	// 合計金額ラベル
 	private JLabel totalPriceLabel;
 	// 合計金額欄
-	private JTextField totalPriceField;
+	private static JTextField totalPriceField;
+	// 小計ラベル
+	private JLabel subtotalPriceLabel;
+	// 小計欄
+	private JTextField subtotalPriceField;
 	// お預かりラベル
 	private JLabel paidPriceLabel;
 	// お預かり金額欄
@@ -95,7 +107,7 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 	// pointラベル
 	private JLabel pointLabel;
 	// point欄
-	private JTextField pointField;
+	static JTextField pointField;
 
 	/*
 	 * コンストラクタ。商品チェック画面が保有するオブジェクトを生成する。
@@ -129,7 +141,7 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 		articlesTable.getColumnModel().getColumn(5).setPreferredWidth(100);
 		articlesTable.getColumnModel().getColumn(5).setCellRenderer(rightAlignmentRenderer);
 		scroll = new JScrollPane(articlesTable);
-		scroll.setBounds(16, 16, 800, 524);
+		scroll.setBounds(16, 16, 800, 498);
 		add(scroll);
 
 		// 会員番号入力ボタンを生成する。
@@ -159,20 +171,27 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 		paymentButton.addActionListener(this);
 		paymentButton.setActionCommand("payment");
 		add(paymentButton);
-
+		
+		// ポイント決済ボタンを生成する。
+		PointpaymentButton = new JButton("ポイント決済");
+		PointpaymentButton.setBounds(832, 272, 160, 48);
+		PointpaymentButton.addActionListener(this);
+		PointpaymentButton.setActionCommand("pointpayment");
+		add(PointpaymentButton);
+				
 		// ホームボタンを生成する。
 		homeButton = new JButton("ホーム画面");
-		homeButton.setBounds(832, 272, 160, 48);
+		homeButton.setBounds(832, 336, 160, 48);
 		homeButton.addActionListener(this);
 		homeButton.setActionCommand("home");
 		add(homeButton);
 
 		// 商品コード入力欄を生成する。
 		articleCodeLabel = new JLabel("商品コード入力");
-		articleCodeLabel.setBounds(16, 568, 100, 24);
+		articleCodeLabel.setBounds(16, 536, 100, 24);
 		add(articleCodeLabel);
 		articleCodeField = new JTextField(8);
-		articleCodeField.setBounds(116, 568, 100, 24);
+		articleCodeField.setBounds(116, 536, 100, 24);
 		articleCodeField.setBackground(Color.YELLOW);
 		articleCodeField.setHorizontalAlignment(JTextField.LEFT);
 		articleCodeField.setEditable(true);
@@ -180,40 +199,51 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 
 		// 商品コード入力ボタンを生成する。
 		articleCodeButton = new JButton("入力");
-		articleCodeButton.setBounds(226, 568, 80, 24);
+		articleCodeButton.setBounds(226, 536, 80, 24);
 		articleCodeButton.addActionListener(this);
 		articleCodeButton.setActionCommand("articleCode");
 		add(articleCodeButton);
 
 		// 会員番号欄を生成する。
 		memberIDLabel = new JLabel("会員番号");
-		memberIDLabel.setBounds(396, 568, 100, 24);
+		memberIDLabel.setBounds(396, 536, 100, 24);
 		add(memberIDLabel);
 		memberIDField = new JTextField(8);
-		memberIDField.setBounds(496, 568, 100, 24);
+		memberIDField.setBounds(496, 536, 100, 24);
 		memberIDField.setBackground(Color.CYAN);
 		memberIDField.setEditable(false);
 		add(memberIDField);
 
 		// 会員氏名欄を生成する。
 		memberNameLabel = new JLabel("会員氏名");
-		memberNameLabel.setBounds(396, 600, 100, 24);
+		memberNameLabel.setBounds(396, 568, 100, 24);
 		add(memberNameLabel);
 		memberNameField = new JTextField(32);
-		memberNameField.setBounds(496, 600, 100, 24);
+		memberNameField.setBounds(496, 568, 100, 24);
 		memberNameField.setBackground(Color.CYAN);
 		memberNameField.setEditable(false);
 		add(memberNameField);
 		
 		// point欄を生成する。
 		pointLabel = new JLabel("ポイント");
-		pointLabel.setBounds(396, 632, 100, 24);
+		pointLabel.setBounds(396, 600, 100, 24);
 		add(pointLabel);
 		pointField = new JTextField(32);
-		pointField.setBounds(496, 632, 100, 24);
+		pointField.setBounds(496, 600, 100, 24);
 		pointField.setBackground(Color.CYAN);
 		pointField.setEditable(false);
 		add(pointField);
+		
+		// 小計欄を生成する。
+		subtotalPriceLabel = new JLabel("小計");
+		subtotalPriceLabel.setBounds(616, 568, 100, 24);
+		add(subtotalPriceLabel);
+		subtotalPriceField = new JTextField(8);
+		subtotalPriceField.setBounds(716, 568, 100, 24);
+		subtotalPriceField.setBackground(Color.CYAN);
+		subtotalPriceField.setHorizontalAlignment(JTextField.RIGHT);
+		subtotalPriceField.setEditable(false);
+		add(subtotalPriceField);
 
 		// お預かり欄を生成する。
 		paidPriceLabel = new JLabel("お預かり");
@@ -265,6 +295,7 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 			memberIDField.setText("");
 			memberNameField.setText("");
 			pointField.setText("");
+			subtotalPriceField.setText("");
 			paidPriceField.setText("");
 			totalPriceField.setText("0");
 			changePriceField.setText("");
@@ -272,6 +303,7 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 			changeSalesPriceButton.setEnabled(false);
 			changeQuantityButton.setEnabled(false);
 			paymentButton.setEnabled(false);
+			PointpaymentButton.setEnabled(false);
 			articleCodeField.requestFocusInWindow();
 			break;
 		case CheckingArticles:
@@ -289,7 +321,10 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 			changeSalesPriceButton.setEnabled(false);
 			changeQuantityButton.setEnabled(false);
 			paymentButton.setEnabled(false);
+			PointpaymentButton.setEnabled(false);
 			break;
+		case CheckMember:
+			PointpaymentButton.setEnabled(true);
 		}
 	}
 
@@ -313,6 +348,34 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 	 */
 	public void setChangePrice(int changePrice) {
 		changePriceField.setText(Integer.toString(changePrice));
+	}
+	
+	/*
+	 * 合計金額欄に金額を表示する。
+	 */
+	public void setTotalPrice(int totalPrice) {
+		totalPriceField.setText(Integer.toString(totalPrice));
+	}
+	
+	/*
+	 * ポイント欄にポイントを表示する。
+	 */
+	public void setPoint(int point) {
+		pointField.setText(Integer.toString(point));
+	}
+
+	/*
+	 * ポイントを返す。
+	 */
+	public static int getPoint() {
+		return Integer.parseInt(pointField.getText());
+	}
+	
+	/*
+	 * 合計額を返す。
+	 */
+	public static int getTotalPrice() {
+		return Integer.parseInt(totalPriceField.getText());
 	}
 
 	/*
@@ -426,8 +489,23 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 	/*
 	 * 決済が要求されたときに呼び出される。
 	 */
-	private void paymentRequested() {
+	private void paymentRequested() throws DBServerIFException {
+
 		if (app.paymentRequested()) {
+			// 決済が完了した場合はホームボタンにフォーカスをあてる。
+			homeButton.requestFocusInWindow();
+		} else {
+			// 決済が未完了の場合は商品コード入力欄にフォーカスをあてる。
+			articleCodeField.requestFocusInWindow();
+		}
+	}
+	
+
+	/*
+	 * ポイント決済が要求されたときに呼び出される。
+	 */
+	private void PointpaymentRequested() {
+		if (app.PointpaymentRequested()) {
 			// 決済が完了した場合はホームボタンにフォーカスをあてる。
 			homeButton.requestFocusInWindow();
 		} else {
@@ -484,7 +562,15 @@ public class CheckArticlesScreenPanel extends JPanel implements ActionListener, 
 			changeSalesQuantityRequested();
 		} else if (cmd.equals("payment")) {
 			// 決済ボタンが押下されたときは決済処理を呼び出す。
-			paymentRequested();
+			try {
+				paymentRequested();
+			} catch (DBServerIFException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
+		} else if (cmd.equals("pointpayment")) {
+			// ポイント決済ボタンが押下されたときはポイント決済処理を呼び出す。
+			PointpaymentRequested();
 		} else if (cmd.equals("home")) {
 			// ホーム画面ボタンが押下されたときは商品チェックキャンセル処理を呼
 			// び出す。

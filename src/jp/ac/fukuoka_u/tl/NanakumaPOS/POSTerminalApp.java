@@ -285,6 +285,7 @@ public class POSTerminalApp {
 			memberUnderChecking = dbServerIF.findMember(memberID);
 			memberpoint = dbServerIF.findMemberpoint(memberID);
 			checkArticlesScreenPanel.memberUnderCheckingChanged();
+			checkArticlesScreenPanel.setState(CheckArticlesScreenPanelState.CheckMember);
 		}
 		catch (DBServerIFException ex) {
 			// 問題の発生を店員に知らせる。
@@ -321,19 +322,27 @@ public class POSTerminalApp {
 		displaySalesOnCustomerDisplay(salesUnderChecking.getIthSale(salesIndex));
 		return true;
 	}
+	
+	
+	
 
 	/*
 	 * 決済が要求された場合に呼び出される。
 	 */
-	public Boolean paymentRequested() {
+	public Boolean paymentRequested() throws DBServerIFException {
+		
 		// 決済対象商品販売の合計金額を得る。
-		int totalPrice = salesUnderChecking.getTotalPrice();
+		
+	
+		int totalPrice = CheckArticlesScreenPanel.getTotalPrice();
 
 		// カスタマディスプレイに合計金額を表示する。
 		customerDisplayIF.displayUpperMessage("合計金額", AbstractedCustomerDisplayIF.Alignment.LEFT);
 		customerDisplayIF.displayLowerMessage(Integer.toString(totalPrice), AbstractedCustomerDisplayIF.Alignment.RIGHT);
 
-		// お預かりの入力を求める。
+		
+		
+		// お預かりの入力を求める。;
 		PaymentDialog paymentDialog = new PaymentDialog(frame, totalPrice);
 		paymentDialog.setVisible(true);
 
@@ -359,13 +368,75 @@ public class POSTerminalApp {
 		cashDrawerIF.openDrawer();
 
 		// データベースを更新する。
-		//@@@ 未実装
+		//会員番号を取得する
+		String ID = memberUnderChecking.getID();
+		int Num = salesUnderChecking.getNumOfSales();
+		
+		for(int i = 0;i < Num ; i++){
+			Sale Sale = salesUnderChecking.getIthSale(i);
+			dbServerIF.updateHistory(ID, Sale);
+		}
+		//ポイント決済ではなく決済のほうに追加
+		//ポイント決済でポイントを更新すると途中で決済を中止したさいに取り返しがつかない
+		//なので表示だけ変更（ポイント欄）
+		//その前に追加分のポイントも追加
+				int point = CheckArticlesScreenPanel.getPoint();
+				int addPoint = totalPrice/100;
+				int changedPoint = point +addPoint; 
+
+		//ポイントのデータベース関連
+		dbServerIF.updateMemberPoint(ID,changedPoint);
 
 		// 商品チェック画面を決済済み状態にする。
 		checkArticlesScreenPanel.setState(CheckArticlesScreenPanelState.PaymentFinished);
 		return true;
 	}
+	
+	
+	
+	
+	
+	/*
+	 * ポイント決済が要求された場合に呼び出される。
+	 */
+	public Boolean PointpaymentRequested() {
+		// 決済対象商品販売の合計金額を得る。
+		int totalPrice = salesUnderChecking.getTotalPrice();
 
+		// ポイントの入力を求める。
+		PointPaymentDialog PointpaymentDialog = new PointPaymentDialog(frame, totalPrice);
+		PointpaymentDialog.setVisible(true);
+
+		// ポイントの入力がキャンセルされた場合は決済もキャンセルする。
+		if (!PointpaymentDialog.isConfirmed())
+			return false;
+
+		// 使用ポイントを得る。
+		int paidPoint = PointpaymentDialog.getPaidPoint();
+
+		// 差し引き後の合計額を計算する。
+		int changedtotalPrice = totalPrice - paidPoint;
+		
+		//保有ポイントを得る
+		int Point = CheckArticlesScreenPanel.getPoint();
+		
+		//差し引き後のポイントを計算する。
+		int changedPoint =  Point - paidPoint;
+
+		// 差し引き後の合計額を商品チェック画面に表示する。
+		checkArticlesScreenPanel.setTotalPrice(changedtotalPrice);
+	
+		// 差し引き後のポイントを商品チェック画面に表示する。
+		checkArticlesScreenPanel.setPoint(changedPoint);
+
+		return true;
+	}
+
+	
+	
+	
+
+	
 	/*
 	 * 商品チェックのキャンセルが要求された場合に呼び出される。
 	 */
@@ -405,10 +476,10 @@ public class POSTerminalApp {
 	public  Boolean memberRegistrationRequested(Member member,String point) {
 		//@@@ データベースに会員登録を依頼する部分は未実装。
 		try {
+			dbServerIF.registerMember(member, point);
+			//dbServerIF.registerMemberpoint(member.getID(), point);
 			memberUnderManagement = member;
 			memberpoint = Integer.parseInt(point);
-			dbServerIF.registerMember(member);
-			dbServerIF.registerMemberpoint(member.getID(), point);
 			memberManagementScreenPanel.memberUnderManagementChanged();
 		
 		}
